@@ -1,6 +1,7 @@
 ###########################################################################################################
 # This code is computing the koopman operator for the logistic map
 # Convergence is exponential in the number of data point, dictionary size grows with number of data points
+# WARNING : Long expected run time, change m_list to range from 2 to 20 for faster run time.
 # Author : Daniel Fassler
 ###########################################################################################################
 include(joinpath(@__DIR__, "..", "koopman_helper_functions.jl"))
