@@ -21,10 +21,6 @@ n_list = 3*scaling.(m_list)
 N_trials = 20
 n = 3
 
-# Jacobi parameters
-α = 1
-β = 0
-
 L2_residuals_unif_leg = zeros(length(n_list), N_trials)
 L2_residuals_unif_cheb = zeros(length(n_list), N_trials)
 L2_residuals_cheb_leg = zeros(length(n_list), N_trials)
