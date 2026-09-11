@@ -98,7 +98,7 @@ end
 
 trials = 10
 σ = 0.01
-λ = 0.01
+λ = 0.1
 
 function load_or_generate_data(generator, filename)
     if isfile(filename)
@@ -125,16 +125,16 @@ bp_data = [
 
 lasso_data = [
     load_or_generate_data("LASSO_data_run_1.jld2") do
-        generate_lasso_data(0.001, 10, λ, trials, "LASSO_data_run_1.jld2"; seeded=true, seed=5)
+        generate_lasso_data(0.001, 10, λ, trials, "LASSO_data_run_1.jld2"; seeded=true, seed=11)
     end,
     load_or_generate_data("LASSO_data_run_2.jld2") do
-        generate_lasso_data(0.001, 5, λ, trials, "LASSO_data_run_2.jld2"; seeded=true, seed=6)
+        generate_lasso_data(0.001, 5, λ, trials, "LASSO_data_run_2.jld2"; seeded=true, seed=12)
     end,
     load_or_generate_data("LASSO_data_run_3.jld2") do
-        generate_lasso_data(0.01, 10, λ, trials, "LASSO_data_run_3.jld2"; seeded=true, seed=7)
+        generate_lasso_data(0.01, 10, λ, trials, "LASSO_data_run_3.jld2"; seeded=true, seed=13)
     end,
     load_or_generate_data("LASSO_data_run_4.jld2") do
-        generate_lasso_data(0.01, 5, λ, trials, "LASSO_data_run_4.jld2"; seeded=true, seed=9)
+        generate_lasso_data(0.01, 5, λ, trials, "LASSO_data_run_4.jld2"; seeded=true, seed=14)
     end,
 ]
 
