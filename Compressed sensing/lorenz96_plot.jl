@@ -1,5 +1,7 @@
 ################################################################
 # Generate and plot the undersampling-rate figures for Lorenz 96.
+# WARNING: Long run time expected, lower d for faster run time
+# Author : Daniel Fassler
 ################################################################
 
 using LinearAlgebra, Random, JLD2, CairoMakie, Convex, COSMO
