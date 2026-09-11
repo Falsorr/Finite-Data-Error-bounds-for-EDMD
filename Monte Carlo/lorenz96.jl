@@ -2,6 +2,7 @@
 # This code computes the Koopman operator for the Lorenz-96 model.
 # It generates Monte Carlo convergence data and a four-panel convergence figure
 # in the same file.
+# Author : Daniel Fassler
 ###########################################################################################################################
 
 include(joinpath(@__DIR__, "..", "koopman_helper_functions.jl"))
