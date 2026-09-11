@@ -2,7 +2,7 @@
 # This code reads the data in logistic_data.jld2, stochastic_logistic_data.jld2, thomas_data.jld2 and generates Figure 1
 # Author : Daniel Fassler
 #########################################################################################################################
-using JLD2
+using JLD2, CairoMakie
 
 include(joinpath(@__DIR__, "..", "koopman_helper_functions.jl"))
 

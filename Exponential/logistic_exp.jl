@@ -6,7 +6,7 @@
 include(joinpath(@__DIR__, "..", "koopman_helper_functions.jl"))
 
 # Fix the seed
-using Random 
+using Random, CairoMakie
 Random.seed!(42)
 
 # Parameters for the stochastic logistic map

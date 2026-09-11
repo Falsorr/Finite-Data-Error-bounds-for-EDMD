@@ -6,7 +6,7 @@
 
 include(joinpath(@__DIR__, "..", "koopman_helper_functions.jl"))
 
-using Random
+using Random, CairoMakie
 Random.seed!(1)
 
 function scaled_trend_line(x_values, y_values; exponent = -1 / 2, lift = 1.5)
@@ -176,7 +176,6 @@ save(joinpath(output_directory, "lorenz96_data.jld2"),
     "residuals_cheb_mon", residuals_cheb_mon,
     "residuals_cheb_fou", residuals_cheb_fou)
 
-# Render one convergence row, matching the four panels used by monte_carlo_plotting.jl.
 plot_data = (
     ("Legendre Basis", residuals_unif_leg, residuals_cheb_leg),
     ("Chebyshev Basis", residuals_unif_cheb, residuals_cheb_cheb),

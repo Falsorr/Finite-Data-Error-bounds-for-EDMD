@@ -2,10 +2,9 @@
 # This file containes all the helper functions that are used in the EDMD files.
 # Author : Daniel Fassler
 ###############################################################################
-using LinearAlgebra, Random, Polynomials, SpecialPolynomials, SpecialFunctions, CairoMakie, StatsBase, SparseArrays, JLD2, DynamicalSystems
+using LinearAlgebra, Random, Polynomials, SpecialPolynomials, SparseArrays, JLD2, DynamicalSystems
 
 const SP = SpecialPolynomials
-const SB = StatsBase
 
 
 ########################## BASIC FUNCTIONS ###########################
@@ -13,19 +12,6 @@ const SB = StatsBase
     # Generate a d-dimensional grid with n points in each direction
     creategrid(d, n, bounds) = vec(collect(Iterators.product((bounds[1]:(bounds[2] - bounds[1])/max(1, (n-1)):bounds[2] for _ in 1:d)...)))
 
-    function hyperbolic_cross2(n; a = (1,1))
-        # Generates the 2d hyperbolic cross index set of maximum vertex n \in N
-        tensor_grid = vec(collect(Iterators.product(0:n, 0:n)))
-        hyperbolic_cross = []
-        for i in tensor_grid
-            if ((i[1]+1)^a[1] * (i[2]+1)^a[2]) <= (n+1)
-                push!(hyperbolic_cross, i)
-            end
-        end
-        return hyperbolic_cross
-    end
-    
-    
     function hyperbolic_cross3(n; a = (1,1,1))
         # Generates the 3d hyperbolic cross index set of maximum vertex  \in N
         tensor_grid = vec(collect(Iterators.product(0:n, 0:n, 0:n)))
@@ -73,68 +59,12 @@ const SB = StatsBase
         return sqrt.(σ)
     end
 
-    function avg_std(X)
-        # computes the average and std
-        avg = sample_average(X)
-        σ = sample_std_dev(X)
-        return avg, σ
-    end
-
     function log_avg_std(X)
         # computes the average and std in log scale for plotting purposes
         X = log10.(X)
         avg = sample_average(X)
         σ = sample_std_dev(X)
         return avg, σ
-    end
-
-    function christofell(basis, x)
-        out = 0
-        n = length(basis)
-        for (i, ψ) in enumerate(basis)
-            out += abs(ψ(x))^2 / n
-        end
-        return out
-    end
-
-    function christofell1_Legendre5(x)
-        return christofell(Legendre1(5), x)
-    end
-
-    function christofell1_Legendre10(x)
-        return christofell(Legendre1(10), x)
-    end
-
-    function christofell1_Chebyshev5(x)
-        return christofell(Chebyshev1(5), x)
-    end
-
-    function christofell1_Chebyshev10(x)
-        return christofell(Chebyshev1(10), x)
-    end
-
-    function christofell2_Legendre_tensor5(x)
-        return christofell(Legendre2_tensor(5), x)
-    end
-
-    function christofell2_Chebyshev_tensor5(x)
-        return christofell(Chebyshev2_tensor(5), x)
-    end
-
-    function christofell3_Legendre_tensor5(x)
-        return christofell(Legendre3_tensor(5), x)
-    end
-
-    function christofell3_Chebyshev_tensor5(x)
-        return christofell(Chebyshev3_tensor(5), x)
-    end
-
-    function christofell1_jacobi5_1_0(x)
-        return christofell(jacobi1(5, 1, 0), x)
-    end
-
-    function christofell1_fourier5(x)
-        return christofell(fourier1(5), x)
     end
 
     function pad(x, n)
@@ -257,31 +187,11 @@ const SB = StatsBase
         return ΨX, ΦY, 𝒦
     end
 ########################## SAMPLING FUNCTIONS ########################
-    function uniform_sampling(m, N)
-        # This function generates m N-dimensional uniform samples in the interval [0, 1]
-        samples = []
-        for i = 1:m
-            sample = rand(N)
-            push!(samples, sample)
-        end
-        return samples
-    end
-
     function uniform_sampling_sym(m, N)
         # This function generates m N-dimensional uniform samples in the interval [-1, 1]
         samples = []
         for i = 1:m
             sample = 2*rand(N) .- 1
-            push!(samples, sample)
-        end
-        return samples
-    end
-
-    function cheb_sampling(m, N)
-        # This function generates m N-dimensional Chebyshev samples in the interval [0, 1]
-        samples = []
-        for i = 1:m
-            sample = 1/2 * cos.(π*rand(N)) .+ 1/2
             push!(samples, sample)
         end
         return samples
@@ -298,21 +208,10 @@ const SB = StatsBase
     end
 
 ########################## DYNAMICAL SYSTEMS #########################
-    function logistic(x, p)
-        # This function computes the logistic map
-        λ = p[1]
-        return [λ*x[1].*(1 .- x[1])]
-    end
-
     function shifted_logistic(x, p)
         # This function computes the shifted logistic map
         λ = p[1]
         return [λ*x[1]^2 - 1]
-    end
-
-    function stochastic_logistic(x, p)
-        # This function computes the stochastic logistic map
-        return [p[1]*rand()*x[1].*(1 .- x[1])]
     end
 
     function shifted_stochastic_logistic(x, p)
@@ -392,166 +291,6 @@ const SB = StatsBase
         return basis
     end
 
-    function Legendre2_tensor(p)
-        # Generates the first (p+1)^2 tensorized Legendre polynomials in the square [-1, 1]x[-1, 1] (normalized)
-        basis = []
-        for i = 0:p
-            for j = 0:p
-                coordinates1 = zeros(i+1)
-                coordinates1[i+1] = 1
-                coordinates2 = zeros(j+1)
-                coordinates2[j+1] = 1
-                pol1 = sqrt((2i+1) / 2) * SP.Legendre(coordinates1)
-                pol2 = sqrt((2j+1) / 2) * SP.Legendre(coordinates2)
-                push!(basis, x -> pol1(x[1]) * pol2(x[2]))
-            end
-        end
-        return basis
-    end
-
-    function Legendre2_hyp(p)
-    # Generates the multivariate Legendre polynomials in the hyperbolic cross Lambda_p
-        basis = []
-        for i in hyperbolic_cross2(p)
-            coordinates1 = zeros(i[1]+1)
-            coordinates1[i[1]+1] = 1
-            coordinates2 = zeros(i[2]+1)
-            coordinates2[i[2]+1] = 1
-            pol1 = sqrt((2i[1]+1) / 2) * SP.Legendre(coordinates1)
-            pol2 = sqrt((2i[2]+1) / 2) * SP.Legendre(coordinates2)
-            push!(basis, x -> pol1(x[1]) * pol2(x[2]))
-        end
-        return basis
-    end
-
-    function Chebyshev2_tensor(p)
-        # Generates the first (p+1)^2 tensorized Chebyshev polynomials in the square [-1, 1]x[-1, 1] (normalized)
-        basis = []
-        for i = 0:p
-            for j = 0:p
-                coordinates1 = zeros(i+1)
-                coordinates1[i+1] = 1
-                coordinates2 = zeros(j+1)
-                coordinates2[j+1] = 1
-                if i == 0
-                    pol1 = ChebyshevT(coordinates1) / sqrt(π)
-                else
-                    pol1 = ChebyshevT(coordinates1) / sqrt(π/2)
-                end
-                if j == 0
-                    pol2 = ChebyshevT(coordinates2) / sqrt(π)
-                else
-                    pol2 = ChebyshevT(coordinates2) / sqrt(π/2)
-                end
-                push!(basis, x -> pol1(x[1]) * pol2(x[2]))
-            end
-        end
-        return basis
-    end
-
-    function chebyshev2_hyp(p)
-    # Generates the multivariate Chebyshev polynomials in the hyperbolic cross Lambda_p
-        basis = []
-        for i in hyperbolic_cross2(p)
-            coordinates1 = zeros(i[1]+1)
-            coordinates1[i[1]+1] = 1
-            coordinates2 = zeros(i[2]+1)
-            coordinates2[i[2]+1] = 1
-            if i[1] == 0
-                pol1 = ChebyshevT(coordinates1) / sqrt(π)
-            else
-                pol1 = ChebyshevT(coordinates1) / sqrt(π/2)
-            end
-            if i[2] == 0
-                pol2 = ChebyshevT(coordinates2) / sqrt(π)
-            else
-                pol2 = ChebyshevT(coordinates2) / sqrt(π/2)
-            end
-            push!(basis, x -> pol1(x[1]) * pol2(x[2]))
-        end
-        return basis
-    end
-
-    function mon2_tensor(p)
-        # Generates the first (p+1)^2 tensorized monomials in the square [-1, 1]x[-1, 1]
-        basis = []
-        for i = 0:p
-            for j = 0:p
-                coordinates1 = zeros(i+1)
-                coordinates1[i+1] = 1
-                coordinates2 = zeros(j+1)
-                coordinates2[j+1] = 1
-                pol1 = Polynomial(coordinates1)
-                pol2 = Polynomial(coordinates2)
-                push!(basis, x -> pol1(x[1]) * pol2(x[2]))
-            end
-        end
-        return basis
-    end
-
-    function mon2_hyp(p)
-    # Generates the multivariate monomials in the hyperbolic cross Lambda_p
-        basis = []
-        for i in hyperbolic_cross2(p)
-            coordinates1 = zeros(i[1]+1)
-            coordinates1[i[1]+1] = 1
-            coordinates2 = zeros(i[2]+1)
-            coordinates2[i[2]+1] = 1
-            pol1 = Polynomial(coordinates1)
-            pol2 = Polynomial(coordinates2)
-            push!(basis, x -> pol1(x[1]) * pol2(x[2]))
-        end
-        return basis
-    end
-
-    function fourier2_tensor(p)
-        # Generates the first (2p+1)^2 tensorized Fourier basis function sin(ax), cos(ax) for a = 1, 2, ..., p
-        basis = []
-        list1 = fourier1(p)
-        list2 = fourier1(p)
-        for i = 1:length(list1)
-            for j = 1:length(list2)
-                push!(basis, x -> list1[i](x[1]) * list2[j](x[2]))
-            end
-        end
-        return basis
-    end
-
-    function fourier2_hyp(p)
-    # Generates the multivariate Fourier basis function sin(a\pi x), cos(a\pi x) for a = 1, 2, ..., p in the hyperbolic cross Lambda_(2p+1)
-        basis = []
-        list = fourier1(p)
-        n = length(list1)
-        for i in hyperbolic_cross2(n)
-            for j in hyperbolic_cross2(p)
-                push!(basis, x -> list[i[1]+1](x[1]) * list[i[2]+1](x[2]))
-            end
-        end
-        return basis
-    end
-
-    function Legendre3_tensor(p)
-        # Generates the first (p+1)^3 tensorized Legendre polynomials in the cube [-1, 1]x[-1, 1]x[-1, 1] (normalized)
-        basis = []
-        for i = 0:p
-            for j = 0:p
-                for k = 0:p
-                    coordinates1 = zeros(i+1)
-                    coordinates1[i+1] = 1
-                    coordinates2 = zeros(j+1)
-                    coordinates2[j+1] = 1
-                    coordinates3 = zeros(k+1)
-                    coordinates3[k+1] = 1
-                    pol1 = sqrt((2i+1) / 2) * SP.Legendre(coordinates1)
-                    pol2 = sqrt((2j+1) / 2) * SP.Legendre(coordinates2)
-                    pol3 = sqrt((2k+1) / 2) * SP.Legendre(coordinates3)
-                    push!(basis, x -> pol1(x[1]) * pol2(x[2]) * pol3(x[3]))
-                end
-            end
-        end
-        return basis
-    end
-
     function Legendre3_hyp(p)
     # Generates the multivariate Legendre polynomials in the hyperbolic cross Lambda_p
         basis = []
@@ -566,41 +305,6 @@ const SB = StatsBase
             pol2 = sqrt((2i[2]+1) / 2) * SP.Legendre(coordinates2)
             pol3 = sqrt((2i[3]+1) / 2) * SP.Legendre(coordinates3)
             push!(basis, x -> pol1(x[1]) * pol2(x[2]) * pol3(x[3]))
-        end
-        return basis
-    end
-
-    function Chebyshev3_tensor(p)
-        # Generates the first (p+1)^3 tensorized Chebyshev polynomials in the cube [-1, 1]x[-1, 1]x[-1, 1] (normalized)
-        basis = []
-        for i = 0:p
-            for j = 0:p
-                for k = 0:p
-                    coordinates1 = zeros(i+1)
-                    coordinates1[i+1] = 1
-                    coordinates2 = zeros(j+1)
-                    coordinates2[j+1] = 1
-                    coordinates3 = zeros(k+1)
-                    coordinates3[k+1] = 1
-                    if i == 0
-                        pol1 = ChebyshevT(coordinates1) / sqrt(π)
-                    else
-                        pol1 = ChebyshevT(coordinates1) / sqrt(π/2)
-                    end
-                    if j == 0
-                        pol2 = ChebyshevT(coordinates2) / sqrt(π)
-                    else
-                        pol2 = ChebyshevT(coordinates2) / sqrt(π/2)
-                    end
-                    if k == 0
-                        pol3 = ChebyshevT(coordinates3) / sqrt(π)
-                    else
-                        pol3 = ChebyshevT(coordinates3) / sqrt(π/2)
-                    end
-                    non_zero_count = (i > 0 ? 1 : 0) + (j > 0 ? 1 : 0) + (k > 0 ? 1 : 0)
-                    push!(basis, x -> 2^(non_zero_count / 2) *pol1(x[1]) * pol2(x[2]) * pol3(x[3]))
-                end
-            end
         end
         return basis
     end
@@ -635,28 +339,6 @@ const SB = StatsBase
         return basis
     end
 
-    function mon3_tensor(p)
-        # Generates the first (p+1)^3 tensorized monomials in the cube [-1, 1]x[-1, 1]x[-1, 1]
-        basis = []
-        for i = 0:p
-            for j = 0:p
-                for k = 0:p
-                    coordinates1 = zeros(i+1)
-                    coordinates1[i+1] = 1
-                    coordinates2 = zeros(j+1)
-                    coordinates2[j+1] = 1
-                    coordinates3 = zeros(k+1)
-                    coordinates3[k+1] = 1
-                    pol1 = Polynomial(coordinates1)
-                    pol2 = Polynomial(coordinates2)
-                    pol3 = Polynomial(coordinates3)
-                    push!(basis, x -> pol1(x[1]) * pol2(x[2]) * pol3(x[3]))
-                end
-            end
-        end
-        return basis
-    end
-
     function mon3_hyp(p)
     # Generates the multivariate monomials in the hyperbolic cross Lambda_p
         basis = []
@@ -675,22 +357,6 @@ const SB = StatsBase
         return basis
     end
 
-    function fourier3_tensor(p)
-        # Generates the first (2p+1)^3 tensorized Fourier basis function sin(ax), cos(ax) for a = 1, 2, ..., p
-        basis = []
-        list1 = fourier1(p)
-        list2 = fourier1(p)
-        list3 = fourier1(p)
-        for i = 1:length(list1)
-            for j = 1:length(list2)
-                for k = 1:length(list3)
-                    push!(basis, x -> list1[i](x) * list2[j](x) * list3[k](x))
-                end
-            end
-        end
-        return basis
-    end
-
     function fourier3_hyp(p)
     # Generates the multivariate Fourier basis function sin(a\pi x), cos(a\pi x) for a = 1, 2, ..., p in the hyperbolic cross Lambda_(2p+1)
         basis = []
@@ -698,24 +364,6 @@ const SB = StatsBase
         n = length(list) - 1
         for i in hyperbolic_cross3(n)
             push!(basis, x -> list[i[1]+1](x[1]) * list[i[2]+1](x[2]) * list[i[3]+1](x[3]))
-        end
-        return basis
-    end
-
-    function jacobi3_hyp(p, α, β)
-        #  Generates the multivariates jacobi polynomials in the hyperbolic cross Lambda_p
-        basis = []
-        for i in hyperbolic_cross3(p)
-            coordinates1 = zeros(i[1]+1)
-            coordinates1[i[1]+1] = 1
-            coordinates2 = zeros(i[2]+1)
-            coordinates2[i[2]+1] = 1
-            coordinates3 = zeros(i[3]+1)
-            coordinates3[i[3]+1] = 1
-            pol1 = sqrt((2i[1] + α + β + 1) / 2^(α + β + 1) * (gamma(i[1] + α + β + 1) * factorial(i[1])) / (gamma(i[1] + α + 1)*gamma(i[1] + β + 1))) * SP.Jacobi{α, β}(coordinates1)
-            pol2 = sqrt((2i[2] + α + β + 1) / 2^(α + β + 1) * (gamma(i[2] + α + β + 1) * factorial(i[2])) / (gamma(i[2] + α + 1)*gamma(i[2] + β + 1))) * SP.Jacobi{α, β}(coordinates2)
-            pol3 = sqrt((2i[3] + α + β + 1) / 2^(α + β + 1) * (gamma(i[3] + α + β + 1) * factorial(i[3])) / (gamma(i[3] + α + 1)*gamma(i[3] + β + 1))) * SP.Jacobi{α, β}(coordinates3)
-            push!(basis, x -> pol1(x[1]) * pol2(x[2]) * pol3(x[3]))
         end
         return basis
     end
@@ -754,45 +402,6 @@ const SB = StatsBase
         return error
     end
 
-    function L_inf_error_Legendre1(ds, A, m, sampling, p, dict_ψ)
-        # Compute the L∞ error of the approximation A[ϕ] of 𝒦[ϕ], for ϕ an observable closed under the action of the Koopman operator.
-        function 𝒦ϕ(x) 
-            val = 0
-            for i = 1:20
-                val += exp(ds(x, p)[1])
-            end
-            return val / 20
-        end
-        l,n = size(A)
-        c = EXP_LEG[1:l]'
-        # Getting the coefficients of the Legendre Polynomial approximation of 𝒦f
-        α = c*A
-
-        function 𝒦ϕhat(x)
-            sum = 0
-            for i = 1:l
-                sum += α[i]*dict_ψ[i](x)
-            end
-            return sum
-        end
-        y = sampling(m, 1)
-        max1 = 0
-        max2 = 0
-        for j = 1:m
-            if abs(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j])) > max1
-            max1 = abs(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j]))
-            end
-        end
-        for j = 1:m
-            if abs(𝒦ϕ(y[j])) > max2
-            max2 = abs(𝒦ϕ(y[j]))
-            end
-        end
-        error = max1 / max2
-        return error
-    end
-
-
     function L₂_error_Chebyshev1(ds, A, m, sampling, p, dict_ψ)
         # Compute the L₂ error of the approximation A[ϕ] of 𝒦[ϕ], for ϕ an observable closed under the action of the Koopman operator.
         function 𝒦ϕ(x)
@@ -825,44 +434,6 @@ const SB = StatsBase
         return error
     end
 
-    function L_inf_error_Chebyshev1(ds, A, m, sampling, p, dict_ψ)
-        # Compute the L∞ error of the approximation A[ϕ] of 𝒦[ϕ], for ϕ an observable closed under the action of the Koopman operator.
-        function 𝒦ϕ(x) 
-            val = 0
-            for i = 1:20
-                val += exp(ds(x, p)[1])
-            end
-            return val / 20
-        end
-        l, n = size(A)
-        c = EXP_CHEB[1:l]'
-        # Getting the coefficients of the Chebyshev Polynomial approximation of 𝒦f
-        α = c * A
-
-        function 𝒦ϕhat(x)
-            sum = 0
-            for i = 1:l
-                sum += α[i] * dict_ψ[i](x)
-            end
-            return sum
-        end
-        y = sampling(m, 1)
-        max1 = 0
-        max2 = 0
-        for j = 1:m
-            if abs(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j])) > max1
-                max1 = abs(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j]))
-            end
-        end
-        for j = 1:m
-            if abs(𝒦ϕ(y[j])) > max2
-                max2 = abs(𝒦ϕ(y[j]))
-            end
-        end
-        error = max1 / max2
-        return error
-    end
-
     function L₂_error_Monomial1(ds, A, m, sampling, p, dict_ψ)
         # Compute the L₂ error of the approximation A[ϕ] of 𝒦[ϕ], for ϕ an observable closed under the action of the Koopman operator.
         function 𝒦ϕ(x)
@@ -892,44 +463,6 @@ const SB = StatsBase
             sum2 += 𝒦ϕ(y[j])^2
         end
         error = sqrt(sum1 / sum2)
-        return error
-    end
-
-    function L_inf_error_Monomial1(ds, A, m, sampling, p, dict_ψ)
-        # Compute the L∞ error of the approximation A[ϕ] of 𝒦[ϕ], for ϕ an observable closed under the action of the Koopman operator.
-        function 𝒦ϕ(x) 
-            val = 0
-            for i = 1:20
-                val += exp(ds(x, p)[1])
-            end
-            return val / 20
-        end
-        l, n = size(A)
-        c = EXP_MON[1:l]'
-        # Getting the coefficients of the Monomial approximation of 𝒦f
-        α = c * A
-
-        function 𝒦ϕhat(x)
-            sum = 0
-            for i = 1:l
-                sum += α[i] * dict_ψ[i](x)
-            end
-            return sum
-        end
-        y = sampling(m, 1)
-        max1 = 0
-        max2 = 0
-        for j = 1:m
-            if abs(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j])) > max1
-                max1 = abs(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j]))
-            end
-        end
-        for j = 1:m
-            if abs(𝒦ϕ(y[j])) > max2
-                max2 = abs(𝒦ϕ(y[j]))
-            end
-        end
-        error = max1 / max2
         return error
     end
 

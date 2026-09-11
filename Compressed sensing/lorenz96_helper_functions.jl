@@ -5,7 +5,7 @@
 
 
 
-using Polynomials, SpecialPolynomials, DynamicalSystems, LinearAlgebra, Random
+using Polynomials, SpecialPolynomials, DynamicalSystems, Random
 
 function lorenz96_rule!(du, u, p, t)
     F = p[1]; N = length(u)
@@ -41,29 +41,6 @@ function generate_data(k, m, n, dt)
         Y[(i-1)*m+1:i*m, :] = Matrix(u[2:end])
     end
     return X, Y
-end
-
-function generate_monomial_basis(N)
-    # Generate the monomial basis
-    basis = []
-    push!(basis, x -> 1.0)
-    for i in 1:N
-        push!(basis, x -> x[i])
-    end
-    return basis
-end
-
-function generate_monomial2_basis(N)
-    # Generate the monomial basis
-    basis = []
-    push!(basis, x -> 1.0)
-    for i in 1:N
-        push!(basis, x -> x[i])
-        for j in i:N
-            push!(basis, x -> x[i]*x[j])
-        end
-    end
-    return basis
 end
 
 function legendre_basis()
@@ -119,18 +96,6 @@ function generate_observables_matrices(X, Y, basis_Φ, basis_Ψ; ϵ = 0)
         end
     end
     return Ψ, Φ
-end
-
-function threshold_matrix(matrix, threshold)
-    result = copy(matrix)
-    for i in 1:size(matrix, 1)
-        for j in 1:size(matrix, 2)
-            if result[i, j] < threshold
-                result[i, j] = 0.0
-            end
-        end
-    end
-    return result
 end
 
 function mean_row(X)

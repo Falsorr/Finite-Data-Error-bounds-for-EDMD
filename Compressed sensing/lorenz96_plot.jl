@@ -2,7 +2,7 @@
 # Generate and plot the undersampling-rate figures for Lorenz 96.
 ################################################################
 
-using LinearAlgebra, Random, JLD2, CairoMakie, DynamicalSystems, Convex, COSMO
+using LinearAlgebra, Random, JLD2, CairoMakie, Convex, COSMO
 include("lorenz96_helper_functions.jl")
 
 
