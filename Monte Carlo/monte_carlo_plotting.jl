@@ -1,5 +1,7 @@
 #########################################################################################################################
 # This code reads the data in logistic_data.jld2, stochastic_logistic_data.jld2, thomas_data.jld2 and generates Figure 1
+# WARNING : Long expected run time for the stochastic logistic map experiment, lower N_trials_hf in stochastic_logistic.jl 
+#           for faster run time.
 # Author : Daniel Fassler
 #########################################################################################################################
 using JLD2, CairoMakie
