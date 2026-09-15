@@ -1,7 +1,5 @@
 ################################################################
 # Generate and plot the undersampling-rate figures for Lorenz 96.
-# WARNING: Long run time expected, lower d for faster run time
-# Author : Daniel Fassler
 ################################################################
 
 using LinearAlgebra, Random, JLD2, CairoMakie, Convex, COSMO
@@ -27,7 +25,7 @@ function generate_basis_pursuit_data(dt, q, σ, trials, filename; seeded=true, s
         n = n_list[n_index]
         println("QCBP Trials for n = $n")
         for trial in 1:trials
-            X, Y = generate_data(n, q, d, dt)
+            X, Y = generate_data(n ÷ q, q, d, dt)
             Ψ, Φ = generate_observables_matrices(X, Y, basis_Φ, basis_Ψ)
             operator = Variable(length(basis_Φ), length(basis_Ψ))
             problem = minimize(norm(operator, 1), [norm(Φ - operator * Ψ) <= σ])
@@ -39,7 +37,7 @@ function generate_basis_pursuit_data(dt, q, σ, trials, filename; seeded=true, s
     for n_index in eachindex(n_list)
         n = n_list[n_index]
         for trial in 1:trials
-            X, Y = generate_data(n, q, d, dt)
+            X, Y = generate_data(n ÷ q, q, d, dt)
             Ψ, Φ = generate_observables_matrices(X, Y, basis_Φ, basis_Ψ)
             validation_residuals[n_index, trial] = norm(Φ - operator_list[n_index, trial] * Ψ, 2)
         end
@@ -69,7 +67,7 @@ function generate_lasso_data(dt, q, λ, trials, filename; seeded=true, seed=1234
         n = n_list[n_index]
         println("LASSO Trials for n = $n")
         for trial in 1:trials
-            X, Y = generate_data(n, q, d, dt)
+            X, Y = generate_data(n ÷ q, q, d, dt)
             Ψ, Φ = generate_observables_matrices(X, Y, basis_Φ, basis_Ψ)
             operator = Variable(length(basis_Φ), length(basis_Ψ))
             problem = minimize(sumsquares(Φ - operator * Ψ) + λ * norm(operator, 1))
@@ -81,7 +79,7 @@ function generate_lasso_data(dt, q, λ, trials, filename; seeded=true, seed=1234
     for n_index in eachindex(n_list)
         n = n_list[n_index]
         for trial in 1:trials
-            X, Y = generate_data(n, q, d, dt)
+            X, Y = generate_data(n ÷ q, q, d, dt)
             Ψ, Φ = generate_observables_matrices(X, Y, basis_Φ, basis_Ψ)
             validation_residuals[n_index, trial] = norm(Φ - operator_list[n_index, trial] * Ψ, 2)
         end

@@ -1,7 +1,6 @@
 ###########################################################################################################
 # This code is computing the koopman operator for the logistic map
 # Convergence is exponential in the number of data point, dictionary size grows with number of data points
-# WARNING : Long expected run time, change m_list to range from 2 to 20 for faster run time.
 # Author : Daniel Fassler
 ###########################################################################################################
 include(joinpath(@__DIR__, "..", "koopman_helper_functions.jl"))
@@ -20,6 +19,10 @@ n_list = 3*scaling.(m_list)
 
 N_trials = 20
 n = 3
+
+# Jacobi parameters
+α = 1
+β = 0
 
 L2_residuals_unif_leg = zeros(length(n_list), N_trials)
 L2_residuals_unif_cheb = zeros(length(n_list), N_trials)

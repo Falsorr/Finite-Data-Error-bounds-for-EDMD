@@ -396,7 +396,7 @@ const SP = SpecialPolynomials
         sum2 = 0
         for j = 1:m
             sum1 += 0.5*(𝒦ϕ(y[j]) - 𝒦ϕhat(y[j]))^2
-            sum2 += 𝒦ϕ(y[j])^2
+            sum2 += 0.5*𝒦ϕ(y[j])^2
         end
         error = sqrt(sum1/sum2)
         return error
@@ -427,8 +427,8 @@ const SP = SpecialPolynomials
         sum1 = 0
         sum2 = 0
         for j = 1:m
-            sum1 += 1/(π*sqrt(1 - y[j][1])) * (𝒦ϕ(y[j]) - 𝒦ϕhat(y[j]))^2
-            sum2 += 1/(π*sqrt(1 - y[j][1])) * 𝒦ϕ(y[j])^2
+            sum1 += 1/(π*sqrt(1 - y[j][1])^2) * (𝒦ϕ(y[j]) - 𝒦ϕhat(y[j]))^2
+            sum2 += 1/(π*sqrt(1 - y[j][1])^2) * 𝒦ϕ(y[j])^2
         end
         error = sqrt(sum1 / sum2)
         return error
@@ -472,5 +472,5 @@ const SP = SpecialPolynomials
     const EXP_LEG = MonToLeg(EXP_MON_NON_ADJ)'
     const EXP_CHEB = MonToCheb(EXP_MON_NON_ADJ)'
     const ONE_D_GRID_SYM = creategrid(1, 10000, (-1, 1))
-    const TWO_D_GRID_SYM = creategrid(2, 10000, (-1, 1))
+    # const TWO_D_GRID_SYM = creategrid(2, 10000, (-1, 1))
     const THREE_D_GRID_SYM = creategrid(3, 100, (-1, 1))
