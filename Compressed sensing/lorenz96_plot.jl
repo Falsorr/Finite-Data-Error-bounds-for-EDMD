@@ -88,7 +88,7 @@ function generate_lasso_data(dt, q, λ, trials, filename; seeded=true, seed=1234
     undersampling_rate = n_list ./ dictionary_size
     mean_validation_residuals = vec(mean_row(validation_residuals))
     std_validation_residuals = vec(std_row(validation_residuals))
-    save(filename, "K_list", operator_list, "validation_residuals", validation_residuals,
+    save(joinpath(@__DIR__, filename), "K_list", operator_list, "validation_residuals", validation_residuals,
         "undersampling_rate", undersampling_rate,
         "mean_validation_residuals_list", mean_validation_residuals,
         "std_validation_residuals_list", std_validation_residuals)
@@ -101,8 +101,8 @@ trials = 10
 λ = 0.1
 
 function load_or_generate_data(generator, filename)
-    if isfile(filename)
-        data = load(filename)
+    if isfile(joinpath(@__DIR__, filename))
+        data = load(joinpath(@__DIR__, filename))
         return (data["undersampling_rate"], data["mean_validation_residuals_list"])
     end
     return generator()
@@ -146,13 +146,17 @@ scatterlines!(ax1, bp_data[3][1], bp_data[3][2], color = :black, marker = :xcros
 scatterlines!(ax1, bp_data[4][1], bp_data[4][2], color = :green, marker = :xcross, linestyle = :dot, label = "q = 5, dt = 0.01")
 axislegend(ax1, position = :rt)
 
-fig5 = Figure(size = (400, 400))
-ax5 = Axis(fig5[1, 1]; xlabel = "Undersampling rate", ylabel = "Residuals", title = "LASSO", yscale = log10)
-scatterlines!(ax5, lasso_data[1][1], lasso_data[1][2], color = :blue, marker = :circle, linestyle = :dot, label = "q = 10, dt = 0.001")
-scatterlines!(ax5, lasso_data[2][1], lasso_data[2][2], color = :red, marker = :circle, linestyle = :solid, label = "q = 5, dt = 0.001")
-scatterlines!(ax5, lasso_data[3][1], lasso_data[3][2], color = :black, marker = :xcross, linestyle = :dot, label = "q = 10, dt = 0.01")
-scatterlines!(ax5, lasso_data[4][1], lasso_data[4][2], color = :green, marker = :xcross, linestyle = :dot, label = "q = 5, dt = 0.01")
-axislegend(ax5, position = :rt)
+fig2 = Figure(size = (400, 400))
+ax2 = Axis(fig2[1, 1]; xlabel = "Undersampling rate", ylabel = "Residuals", title = "LASSO", yscale = log10)
+scatterlines!(ax2, lasso_data[1][1], lasso_data[1][2], color = :blue, marker = :circle, linestyle = :dot, label = "q = 10, dt = 0.001")
+scatterlines!(ax2, lasso_data[2][1], lasso_data[2][2], color = :red, marker = :circle, linestyle = :solid, label = "q = 5, dt = 0.001")
+scatterlines!(ax2, lasso_data[3][1], lasso_data[3][2], color = :black, marker = :xcross, linestyle = :dot, label = "q = 10, dt = 0.01")
+scatterlines!(ax2, lasso_data[4][1], lasso_data[4][2], color = :green, marker = :xcross, linestyle = :dot, label = "q = 5, dt = 0.01")
+axislegend(ax2, position = :rt)
 
-save("BP_undersampling_rate.png", fig1)
-save("LASSO_undersampling_rate.png", fig5)
+display(fig1)
+display(fig2)
+
+save(joinpath(@__DIR__, "BP_undersampling_rate.png"), fig1)
+save(joinpath(@__DIR__, "LASSO_undersampling_rate.png"), fig2)
+
