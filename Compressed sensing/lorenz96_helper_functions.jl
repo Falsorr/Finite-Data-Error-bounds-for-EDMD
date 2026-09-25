@@ -5,7 +5,7 @@
 
 
 
-using Polynomials, SpecialPolynomials, DynamicalSystems, Random
+using Polynomials, SpecialPolynomials, DynamicalSystems, LinearAlgebra, Random
 
 function lorenz96_rule!(du, u, p, t)
     F = p[1]; N = length(u)

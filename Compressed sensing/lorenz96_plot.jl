@@ -138,25 +138,22 @@ lasso_data = [
     end,
 ]
 
-fig1 = Figure(size = (400, 400))
-ax1 = Axis(fig1[1, 1]; xlabel = "Undersampling rate", ylabel = "Residuals", title = "Basis Pursuit", yscale = log10)
+fig = Figure(size = (800, 450), figure_padding = 20)
+colgap!(fig.layout, 20)
+ax1 = Axis(fig[1, 2]; title = "QCBP-EDMD (σ = $σ)", xlabel = "Undersampling rate", ylabel = "Residuals", yscale = log10)
 scatterlines!(ax1, bp_data[1][1], bp_data[1][2], color = :blue, marker = :circle, linestyle = :dot, label = "q = 10, dt = 0.001")
 scatterlines!(ax1, bp_data[2][1], bp_data[2][2], color = :red, marker = :circle, linestyle = :solid, label = "q = 5, dt = 0.001")
 scatterlines!(ax1, bp_data[3][1], bp_data[3][2], color = :black, marker = :xcross, linestyle = :dot, label = "q = 10, dt = 0.01")
 scatterlines!(ax1, bp_data[4][1], bp_data[4][2], color = :green, marker = :xcross, linestyle = :dot, label = "q = 5, dt = 0.01")
 axislegend(ax1, position = :rt)
 
-fig2 = Figure(size = (400, 400))
-ax2 = Axis(fig2[1, 1]; xlabel = "Undersampling rate", ylabel = "Residuals", title = "LASSO", yscale = log10)
+ax2 = Axis(fig[1, 1]; title = "LASSO-EDMD (λ = $λ)", xlabel = "Undersampling rate", ylabel = "Residuals", yscale = log10)
 scatterlines!(ax2, lasso_data[1][1], lasso_data[1][2], color = :blue, marker = :circle, linestyle = :dot, label = "q = 10, dt = 0.001")
 scatterlines!(ax2, lasso_data[2][1], lasso_data[2][2], color = :red, marker = :circle, linestyle = :solid, label = "q = 5, dt = 0.001")
 scatterlines!(ax2, lasso_data[3][1], lasso_data[3][2], color = :black, marker = :xcross, linestyle = :dot, label = "q = 10, dt = 0.01")
 scatterlines!(ax2, lasso_data[4][1], lasso_data[4][2], color = :green, marker = :xcross, linestyle = :dot, label = "q = 5, dt = 0.01")
 axislegend(ax2, position = :rt)
 
-display(fig1)
-display(fig2)
-
-save(joinpath(@__DIR__, "BP_undersampling_rate.png"), fig1)
-save(joinpath(@__DIR__, "LASSO_undersampling_rate.png"), fig2)
+display(fig)
+save(joinpath(@__DIR__, "undersampling_rate.png"), fig)
 
